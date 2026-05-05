@@ -3,6 +3,7 @@ package com.example.orderservice.service;
 import com.example.orderservice.model.Order;
 import com.example.orderservice.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -10,14 +11,28 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository repository;
+    private final RestTemplate restTemplate;
 
-    public OrderService(OrderRepository repository) {
+    public OrderService(OrderRepository repository, RestTemplate restTemplate) {
         this.repository = repository;
+        this.restTemplate = restTemplate;
     }
 
-    // Create Order
+    // Create Order with Payment Integration
     public Order createOrder(Order order) {
-        order.setStatus("CREATED");
+
+        // Call Payment Service
+        String paymentUrl = "http://localhost:8082/payment?amount=" + order.getPrice();
+
+        String paymentResponse = restTemplate.postForObject(paymentUrl, null, String.class);
+
+        // Update status based on payment response
+        if ("SUCCESS".equals(paymentResponse)) {
+            order.setStatus("COMPLETED");
+        } else {
+            order.setStatus("FAILED");
+        }
+
         return repository.save(order);
     }
 
@@ -27,7 +42,7 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
-    // Get all Orders
+    // Get All Orders
     public List<Order> getAllOrders() {
         return repository.findAll();
     }
