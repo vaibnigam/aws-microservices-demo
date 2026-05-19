@@ -22,7 +22,7 @@ public class OrderService {
     public Order createOrder(Order order) {
 
         // Call Payment Service
-        String paymentUrl = "http://localhost:8082/payment?amount=" + order.getPrice();
+        String paymentUrl = "http://payment-container:8082/payment?amount=" + order.getPrice();
 
         String paymentResponse = restTemplate.postForObject(paymentUrl, null, String.class);
 
