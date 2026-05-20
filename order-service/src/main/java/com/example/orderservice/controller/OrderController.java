@@ -1,7 +1,10 @@
 package com.example.orderservice.controller;
 
-import com.example.orderservice.model.Order;
+import com.example.orderservice.dto.OrderRequestDTO;
+import com.example.orderservice.dto.OrderResponseDTO;
+import com.example.orderservice.entity.Order;
 import com.example.orderservice.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,27 +13,19 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
-    private final OrderService service;
+    private final OrderService orderService;
 
-    public OrderController(OrderService service) {
-        this.service = service;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
-    // Create Order
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return service.createOrder(order);
+    public OrderResponseDTO createOrder(@Valid @RequestBody OrderRequestDTO requestDTO) {
+        return orderService.createOrder(requestDTO);
     }
 
-    // Get Order by ID
-    @GetMapping("/{id}")
-    public Order getOrder(@PathVariable Long id) {
-        return service.getOrder(id);
-    }
-
-    // Get All Orders
     @GetMapping
     public List<Order> getAllOrders() {
-        return service.getAllOrders();
+        return orderService.getAllOrders();
     }
 }

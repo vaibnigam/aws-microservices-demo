@@ -1,9 +1,11 @@
 package com.example.orderservice.service;
 
-import com.example.orderservice.model.Order;
+import com.example.orderservice.entity.Order;
 import com.example.orderservice.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import com.example.orderservice.dto.OrderRequestDTO;
+import com.example.orderservice.dto.OrderResponseDTO;
 
 import java.util.List;
 
@@ -19,21 +21,31 @@ public class OrderService {
     }
 
     // Create Order with Payment Integration
-    public Order createOrder(Order order) {
+    public OrderResponseDTO createOrder(OrderRequestDTO requestDTO) {
 
-        // Call Payment Service
-        String paymentUrl = "http://payment-container:8082/payment?amount=" + order.getPrice();
+        String customerResponse = restTemplate.getForObject(
+                "http://customer-container:8083/customers/" + requestDTO.getCustomerId(),
+                String.class
+        );
+        String paymentResponse = restTemplate.getForObject(
+                "http://payment-container:8082/payment?amount=" + requestDTO.getPrice(),
+                String.class
+        );
 
-        String paymentResponse = restTemplate.postForObject(paymentUrl, null, String.class);
+        Order order = new Order();
 
-        // Update status based on payment response
-        if ("SUCCESS".equals(paymentResponse)) {
-            order.setStatus("COMPLETED");
-        } else {
-            order.setStatus("FAILED");
-        }
+        order.setCustomerId(requestDTO.getCustomerId());
+        order.setProductName(requestDTO.getProductName());
+        order.setQuantity(requestDTO.getQuantity());
+        order.setPrice(requestDTO.getPrice());
 
-        return repository.save(order);
+        order.setStatus(paymentResponse);
+        Order savedOrder = repository.save(order);
+
+        return new OrderResponseDTO(
+                savedOrder.getId(),
+                paymentResponse
+        );
     }
 
     // Get Order by ID

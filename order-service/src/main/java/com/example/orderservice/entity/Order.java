@@ -1,7 +1,9 @@
-package com.example.orderservice.model;
+package com.example.orderservice.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "orders")
@@ -14,11 +16,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long customerId;
+
     private String productName;
 
-    private int quantity;
+    private Integer quantity;
 
-    private double price;
+    private Double price;
 
     private String status;
 }

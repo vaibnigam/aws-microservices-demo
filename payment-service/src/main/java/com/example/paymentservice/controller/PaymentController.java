@@ -13,7 +13,7 @@ public class PaymentController {
         this.service = service;
     }
 
-    @PostMapping
+    @GetMapping
     public String makePayment(@RequestParam double amount) {
         return service.processPayment(amount);
     }
