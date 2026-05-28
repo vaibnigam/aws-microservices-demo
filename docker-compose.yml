@@ -9,13 +9,64 @@ services:
   order-service:
     build: ./order-service
     container_name: order-container
+
     ports:
       - "8081:8081"
+
     depends_on:
       - payment-service
+      - order-db
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-db:5432/orderdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  order-db:
+    image: postgres:17
+    container_name: order-db
+
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
+
+  customer-db:
+    image: postgres:17
+    container_name: customer-db
+
+    environment:
+      POSTGRES_DB: customerdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - customer_postgres_data:/var/lib/postgresql/data
 
   customer-service:
     build: ./customer-service
     container_name: customer-container
+
     ports:
       - "8083:8083"
+
+    depends_on:
+      - customer-db
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://customer-db:5432/customerdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+volumes:
+  order_postgres_data:
+  customer_postgres_data:
