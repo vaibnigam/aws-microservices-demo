@@ -1,6 +1,7 @@
 package com.example.orderservice.service;
 
 import com.example.orderservice.entity.Order;
+import com.example.orderservice.entity.OrderStatus;
 import com.example.orderservice.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -39,7 +40,16 @@ public class OrderService {
         order.setQuantity(requestDTO.getQuantity());
         order.setPrice(requestDTO.getPrice());
 
-        order.setStatus(paymentResponse);
+        order.setStatus(OrderStatus.CREATED);
+
+        order.setStatus(OrderStatus.PAYMENT_PENDING);
+
+        if ("SUCCESS".equalsIgnoreCase(paymentResponse)) {
+            order.setStatus(OrderStatus.PAID);
+        } else {
+            order.setStatus(OrderStatus.FAILED);
+        }
+
         Order savedOrder = repository.save(order);
 
         return new OrderResponseDTO(

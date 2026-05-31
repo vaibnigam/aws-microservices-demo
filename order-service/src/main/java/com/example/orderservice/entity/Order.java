@@ -24,5 +24,6 @@ public class Order {
 
     private Double price;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 }
